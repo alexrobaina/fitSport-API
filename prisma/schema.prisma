@@ -13,7 +13,58 @@ model User {
   password  String
   name      String?
   picture   String?
-  sport     String?
-  goal      String?
   createdAt DateTime @default(now())
+
+  profile   UserProfile?
+  sessions  WorkoutSession[]
+  UserSport UserSport[]
+}
+
+model UserProfile {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  age             Int?
+  weight          Float?
+  height          Float? // cm
+  gender          String? // "male", "female", "non-binary"
+  goal            String? // e.g. "muscle_gain", "fat_loss"
+  frequency       String? // e.g. "3x_week", "daily"
+  experienceLevel String? // "beginner", "intermediate", "advanced"
+  dietStyle       String? // e.g. "vegan", "balanced"
+  allergies       String? // free text (e.g., "peanuts, gluten")
+  injuries        String? // e.g. "knee pain"
+  preferredTime   String? // "morning", "evening"
+  aiNotes         String? // Free form extra info
+
+  user  User    @relation(fields: [userId], references: [id])
+  Sport Sport[]
+}
+
+model WorkoutSession {
+  id       String   @id @default(cuid())
+  userId   String
+  date     DateTime
+  summary  String?
+  duration Int? // minutes
+  calories Int?
+  notes    String?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Sport {
+  id            String       @id @default(cuid())
+  name          String       @unique
+  UserProfile   UserProfile? @relation(fields: [userProfileId], references: [id])
+  userProfileId String?
+  UserSport     UserSport[]
+}
+
+model UserSport {
+  id      String @id @default(cuid())
+  userId  String
+  sportId String
+
+  user  User  @relation(fields: [userId], references: [id])
+  sport Sport @relation(fields: [sportId], references: [id])
 }

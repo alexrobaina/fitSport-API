@@ -13,20 +13,42 @@ export class UsersService {
     });
   }
 
+  async findById(id: string) {
+    return this.prisma.user.findUnique({
+      where: { id },
+    });
+  }
+
   async createUser(data: RegisterDto) {
-    console.log(data);
-    if (!data.password) {
-      throw new Error('Password is required');
-    }
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const { email, password, name, sport, goal, picture, ...profileData } =
+      data;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     return this.prisma.user.create({
       data: {
-        email: data.email,
+        email,
         password: hashedPassword,
-        name: data.name,
-        sport: data.sport,
-        goal: data.goal,
-        picture: data.picture,
+        name,
+        picture,
+        profile: {
+          create: {
+            goal,
+            ...profileData,
+            Sport: {
+              connect: {
+                name: sport[0],
+              },
+            },
+          },
+        },
+      },
+      include: {
+        profile: {
+          include: {
+            Sport: true,
+          },
+        },
       },
     });
   }
