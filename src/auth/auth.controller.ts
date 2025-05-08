@@ -8,17 +8,17 @@ import {
   Body,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RegisterDto } from './dto/register.dto';
-import { UsersService } from './user.service';
+import { UserService } from '../user/user.service';
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private usersService: UsersService,
+    private usersService: UserService,
   ) {}
 
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('login')
   async login(@Request() req) {
     return this.authService.login(req.user);
@@ -30,7 +30,6 @@ export class AuthController {
     return this.authService.login(user);
   }
 
-  @UseGuards(LocalAuthGuard)
   @Get('me')
   async getProfile(@Request() req) {
     return await this.usersService.findById(req.user.userId);
